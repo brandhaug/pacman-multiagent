@@ -25,6 +25,7 @@ import json
 
 from collections import defaultdict
 from pprint import PrettyPrinter
+
 pp = PrettyPrinter()
 
 from game import Agent
@@ -33,9 +34,11 @@ from ghostAgents import RandomGhost, DirectionalGhost
 import random, math, traceback, sys, os
 import layout, pacman
 import autograder
+
 # import grading
 
 VERBOSE = False
+
 
 class MultiagentTreeState(object):
     def __init__(self, problem, state):
@@ -44,7 +47,8 @@ class MultiagentTreeState(object):
 
     def generateSuccessor(self, agentIndex, action):
         if VERBOSE:
-            print("generateSuccessor(%s, %s, %s) -> %s" % (self.state, agentIndex, action, self.problem.stateToSuccessorMap[self.state][action]))
+            print("generateSuccessor(%s, %s, %s) -> %s" % (
+            self.state, agentIndex, action, self.problem.stateToSuccessorMap[self.state][action]))
         successor = self.problem.stateToSuccessorMap[self.state][action]
         self.problem.generatedStates.add(successor)
         return MultiagentTreeState(self.problem, successor)
@@ -59,7 +63,7 @@ class MultiagentTreeState(object):
     def getLegalActions(self, agentIndex=0):
         if VERBOSE:
             print("getLegalActions(%s) -> %s" % (self.state, self.problem.stateToActions[self.state]))
-        #if len(self.problem.stateToActions[self.state]) == 0:
+        # if len(self.problem.stateToActions[self.state]) == 0:
         #    print "WARNING: getLegalActions called on leaf state %s" % (self.state,)
         return list(self.problem.stateToActions[self.state])
 
@@ -128,7 +132,6 @@ def parseTreeProblem(testDict):
     return MultiagentTreeProblem(numAgents, startState, winStates, loseStates, successors, evaluation)
 
 
-
 def run(lay, layName, pac, ghosts, disp, nGames=1, name='games'):
     """
     Runs a few games and outputs their statistics.
@@ -137,10 +140,14 @@ def run(lay, layName, pac, ghosts, disp, nGames=1, name='games'):
     print('*** Running %s on' % name, layName, '%d time(s).' % nGames)
     games = pacman.runGames(lay, pac, ghosts, disp, nGames, False, catchExceptions=True, timeout=120)
     print('*** Finished running %s on' % name, layName, 'after %d seconds.' % (time.time() - starttime))
-    stats = {'time': time.time() - starttime, 'wins': [g.state.isWin() for g in games].count(True), 'games': games, 'scores': [g.state.getScore() for g in games],
-             'timeouts': [g.agentTimeout for g in games].count(True), 'crashes': [g.agentCrashed for g in games].count(True)}
-    print('*** Won %d out of %d games. Average score: %f ***' % (stats['wins'], len(games), sum(stats['scores']) * 1.0 / len(games)))
+    stats = {'time': time.time() - starttime, 'wins': [g.state.isWin() for g in games].count(True), 'games': games,
+             'scores': [g.state.getScore() for g in games],
+             'timeouts': [g.agentTimeout for g in games].count(True),
+             'crashes': [g.agentCrashed for g in games].count(True)}
+    print('*** Won %d out of %d games. Average score: %f ***' % (
+    stats['wins'], len(games), sum(stats['scores']) * 1.0 / len(games)))
     return stats
+
 
 class GradingAgent(Agent):
     def __init__(self, seed, studentAgent, optimalActions, altDepthActions, partialPlyBugActions):
@@ -221,7 +228,8 @@ class GradingAgent(Agent):
 class PolyAgent(Agent):
     def __init__(self, seed, multiAgents, ourPacOptions, depth):
         # prepare our pacman agents
-        solutionAgents, alternativeDepthAgents, partialPlyBugAgents = self.construct_our_pacs(multiAgents, ourPacOptions)
+        solutionAgents, alternativeDepthAgents, partialPlyBugAgents = self.construct_our_pacs(multiAgents,
+                                                                                              ourPacOptions)
         for p in solutionAgents:
             p.depth = depth
         for p in partialPlyBugAgents:
@@ -286,6 +294,7 @@ class PolyAgent(Agent):
         # return traces from individual agents
         return (self.optimalActionLists, self.alternativeDepthLists, self.partialPlyBugLists)
 
+
 class PacmanGameTreeTest(testClasses.TestCase):
 
     def __init__(self, question, testDict):
@@ -321,7 +330,7 @@ class PacmanGameTreeTest(testClasses.TestCase):
         if code == 0:
             return self.testPass(grades)
         elif code == -3:
-            if pac.getWrongStatesExplored() >=0:
+            if pac.getWrongStatesExplored() >= 0:
                 self.addMessage('Bug: Wrong number of states expanded.')
                 return self.testFail(grades)
             else:
@@ -368,7 +377,6 @@ class PacmanGameTreeTest(testClasses.TestCase):
         handle.close()
 
 
-
 class GraphGameTreeTest(testClasses.TestCase):
 
     def __init__(self, question, testDict):
@@ -404,7 +412,8 @@ class GraphGameTreeTest(testClasses.TestCase):
 
         if generated != goldGenerated:
             self.addMessage('Incorrect generated nodes for depth=%s' % (self.depth,))
-            self.addMessage('    Student generated nodes: %s\n    Correct generated nodes: %s' % (generated, goldGenerated))
+            self.addMessage(
+                '    Student generated nodes: %s\n    Correct generated nodes: %s' % (generated, goldGenerated))
             fail = True
 
         if fail:
@@ -442,13 +451,12 @@ class EvalAgentTest(testClasses.TestCase):
         self.nonTimeoutMinimum = int(testDict['nonTimeoutMinimum']) if 'nonTimeoutMinimum' in testDict else None
         self.winsMinimum = int(testDict['winsMinimum']) if 'winsMinimum' in testDict else None
 
-        self.scoreThresholds = [int(s) for s in testDict.get('scoreThresholds','').split()]
-        self.nonTimeoutThresholds = [int(s) for s in testDict.get('nonTimeoutThresholds','').split()]
-        self.winsThresholds = [int(s) for s in testDict.get('winsThresholds','').split()]
+        self.scoreThresholds = [int(s) for s in testDict.get('scoreThresholds', '').split()]
+        self.nonTimeoutThresholds = [int(s) for s in testDict.get('nonTimeoutThresholds', '').split()]
+        self.winsThresholds = [int(s) for s in testDict.get('winsThresholds', '').split()]
 
         self.maxPoints = sum([len(t) for t in [self.scoreThresholds, self.nonTimeoutThresholds, self.winsThresholds]])
         self.agentArgs = testDict.get('agentArgs', '')
-
 
     def execute(self, grades, moduleDict, solutionDict):
         startTime = time.time()
@@ -462,12 +470,14 @@ class EvalAgentTest(testClasses.TestCase):
         disp = self.question.getDisplay()
 
         random.seed(self.seed)
-        games = pacman.runGames(lay, agent, self.ghosts, disp, self.numGames, False, catchExceptions=True, timeout=self.maxTime)
+        games = pacman.runGames(lay, agent, self.ghosts, disp, self.numGames, False, catchExceptions=True,
+                                timeout=self.maxTime)
         totalTime = time.time() - startTime
 
         stats = {'time': totalTime, 'wins': [g.state.isWin() for g in games].count(True),
                  'games': games, 'scores': [g.state.getScore() for g in games],
-                 'timeouts': [g.agentTimeout for g in games].count(True), 'crashes': [g.agentCrashed for g in games].count(True)}
+                 'timeouts': [g.agentTimeout for g in games].count(True),
+                 'crashes': [g.agentCrashed for g in games].count(True)}
 
         averageScore = sum(stats['scores']) / float(len(stats['scores']))
         nonTimeouts = self.numGames - stats['timeouts']
@@ -483,12 +493,13 @@ class EvalAgentTest(testClasses.TestCase):
             return (passed, points, value, minimum, thresholds, name)
 
         results = [gradeThreshold(averageScore, self.scoreMinimum, self.scoreThresholds, "average score"),
-                   gradeThreshold(nonTimeouts, self.nonTimeoutMinimum, self.nonTimeoutThresholds, "games not timed out"),
+                   gradeThreshold(nonTimeouts, self.nonTimeoutMinimum, self.nonTimeoutThresholds,
+                                  "games not timed out"),
                    gradeThreshold(wins, self.winsMinimum, self.winsThresholds, "wins")]
 
         totalPoints = 0
         for passed, points, value, minimum, thresholds, name in results:
-            if minimum == None and len(thresholds)==0:
+            if minimum == None and len(thresholds) == 0:
                 continue
 
             # print passed, points, value, minimum, thresholds, name
@@ -502,15 +513,15 @@ class EvalAgentTest(testClasses.TestCase):
             if minimum != None:
                 self.addMessage("    Grading scheme:")
                 self.addMessage("     < %s:  fail" % (minimum,))
-                if len(thresholds)==0 or minimum != thresholds[0]:
+                if len(thresholds) == 0 or minimum != thresholds[0]:
                     self.addMessage("    >= %s:  0 points" % (minimum,))
                 for idx, threshold in enumerate(thresholds):
-                    self.addMessage("    >= %s:  %s points" % (threshold, idx+1))
+                    self.addMessage("    >= %s:  %s points" % (threshold, idx + 1))
             elif len(thresholds) > 0:
                 self.addMessage("    Grading scheme:")
                 self.addMessage("     < %s:  0 points" % (thresholds[0],))
                 for idx, threshold in enumerate(thresholds):
-                    self.addMessage("    >= %s:  %s points" % (threshold, idx+1))
+                    self.addMessage("    >= %s:  %s points" % (threshold, idx + 1))
 
         if any([not passed for passed, _, _, _, _, _ in results]):
             totalPoints = 0
@@ -523,7 +534,3 @@ class EvalAgentTest(testClasses.TestCase):
         handle.write('# File intentionally blank.\n')
         handle.close()
         return True
-
-
-
-
