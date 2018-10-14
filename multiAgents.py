@@ -10,7 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
+import math
 
 from util import manhattanDistance
 from game import Directions
@@ -74,7 +74,32 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        score = 0.00
+
+        for ghostState in newGhostStates:
+            if ghostState.scaredTimer < 2:
+                manhattan_distance = manhattanDistance(newPos, ghostState.getPosition())
+                score = 0 if manhattan_distance == 0 else math.log2(manhattan_distance)
+
+        print('Score after Manhattan Distance', score)
+
+        if newFood[newPos[0] + 1][newPos[1]]:
+            score += 5
+
+        if newFood[newPos[0]][newPos[1] + 1]:
+            score += 5
+
+        if newFood[newPos[0] - 1][newPos[1]]:
+            score += 5
+
+        if newFood[newPos[0]][newPos[1] - 1]:
+            score += 5
+
+        print('Score after food', score)
+
+        print('Total score', score)
+
+        return score
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -114,6 +139,68 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
 
+    def minimizer(self, gameState, depth):
+        print('Minimizing')
+
+        agents_count = gameState.getNumAgents()
+        minimum_score_sum = 0
+
+        for ghost_index in range(1, agents_count):
+            legalMoves = gameState.getLegalActions(ghost_index)
+
+            minimum_score = math.inf
+
+            for move_index, action in enumerate(legalMoves):
+                print('MOVE_INDEX', move_index)
+                successor_game_state = gameState.generateSuccessor(ghost_index, action)
+
+                score = self.minimax(successor_game_state, depth - 1, True)
+
+                print('Evaluation %.2f <= minEval %.2f' % (score, minimum_score))
+
+                if score <= minimum_score:
+                    minimum_score = score
+                    print('Adding evalIndex to minIndex')
+
+            minimum_score_sum += minimum_score
+
+        return minimum_score_sum
+
+    def maximizer(self, gameState, depth):
+        print('Depth', depth)
+
+        print('Maximizing')
+        max_score = -math.inf
+
+        legalMoves = gameState.getLegalActions()
+
+        for move_index, action in enumerate(legalMoves):
+            print('MOVE_INDEX', move_index)
+            successor_game_state = gameState.generateSuccessor(0, action)
+
+            score = self.minimax(successor_game_state, depth - 1, False)
+
+            if score >= max_score:
+                print('Evaluation %.2f >= maxEval %.2f' % (score, max_score))
+                max_score = score
+
+        print('Returning maxEval %.2f' % max_score)
+        return max_score
+
+    def minimax(self, gameState, depth, maximizingPlayer):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            print('Depth == 0', depth == 0)
+            print('Is lose', gameState.isLose())
+            print('Is win', gameState.isWin())
+            score = gameState.getScore()
+            print('Current score', score)
+            return score
+
+        if maximizingPlayer:
+            return self.maximizer(gameState, depth)
+        else:
+            return self.minimizer(gameState, depth)
+
     def getAction(self, gameState):
         """
           Returns the minimax action from the current gameState using self.depth
@@ -132,7 +219,30 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        print('================ MINIMAX ================')
+        legal_actions = gameState.getLegalActions()
+
+        best_action = Directions.STOP
+        score = -math.inf
+
+        for action in legal_actions:
+            print('================= START OF ACTION %s =================' % action)
+            next_state = gameState.generateSuccessor(0, action)
+            previous_score = score
+            score = self.minimax(next_state, self.depth, False)
+            print('============ SCORE ============')
+            print(score)
+            print('============ PREVIOUS SCORE ============')
+            print(previous_score)
+
+            if score > previous_score:
+                print('SCORE IS HIGHER, SWITCHING ACTION')
+                best_action = action
+
+        print('================= END OF ACTION %s =================' % action)
+
+        return best_action
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
