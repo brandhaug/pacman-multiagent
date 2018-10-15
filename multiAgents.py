@@ -147,9 +147,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             successor_game_state = game_state.generateSuccessor(agent, action)
 
             if agent == game_state.getNumAgents() - 1:  # last ghost
-                scores.append(self.minimax(successor_game_state, depth - 1, 0, True)[0])
+                scores.append(self.minimax(successor_game_state, depth - 1, agent=0, maximizing=True)[0])
             else:
-                scores.append(self.minimax(successor_game_state, depth, agent + 1, False)[0])
+                scores.append(self.minimax(successor_game_state, depth, agent=agent + 1, maximizing=False)[0])
 
         min_score = min(scores)
         min_indexes = [i for i, score in enumerate(scores) if score == min_score]
@@ -163,7 +163,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for action in actions:
             successor_game_state = game_state.generateSuccessor(agent, action)
-            scores.append(self.minimax(successor_game_state, depth, 1, False)[0])
+            scores.append(self.minimax(successor_game_state, depth, agent=agent + 1, maximizing=False)[0])
 
         max_score = max(scores)
         max_indexes = [i for i, score in enumerate(scores) if score == max_score]
@@ -253,7 +253,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                                  depth,
                                  alpha=alpha,
                                  beta=beta,
-                                 agent=1,
+                                 agent=agent + 1,
                                  maximizing=False)[0]
             scores.append(score)
             max_score = max(scores)
