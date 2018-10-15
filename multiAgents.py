@@ -170,7 +170,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             successor_game_state = game_state.generateSuccessor(agent, action)
             scores.append(self.minimax(successor_game_state, depth, 1, False)[0])
             max_score = max(scores)
-            max_indexes = [i for i in range(len(scores)) if scores[i] == max_score]
+            max_indexes = [i for i, score in enumerate(scores) if score == max_score]
 
         chosen_action = actions[random.choice(max_indexes)]
 
@@ -212,12 +212,90 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Your minimax agent with alpha-beta pruning (question 3)
     """
 
+    def minimizer(self, game_state, depth, alpha, beta, agent):
+        actions = game_state.getLegalActions(agent)
+        min_indexes = []
+        scores = []
+        min_score = math.inf
+
+        for action in actions:
+            successor_game_state = game_state.generateSuccessor(agent, action)
+
+            if agent == game_state.getNumAgents() - 1:  # last ghost
+                score, temp_action, temp_alpha, temp_beta = self.minimax(successor_game_state,
+                                                                         depth - 1,
+                                                                         alpha=alpha,
+                                                                         beta=beta,
+                                                                         agent=agent,
+                                                                         maximizing=True)
+            else:
+                score, temp_action, temp_alpha, temp_beta = self.minimax(successor_game_state,
+                                                                         depth,
+                                                                         alpha=alpha,
+                                                                         beta=beta,
+                                                                         agent=agent + 1,
+                                                                         maximizing=False)
+
+            scores.append(score)
+            min_score = min(scores)
+            beta = min(beta, min_score)
+            min_indexes = [i for i, score in enumerate(scores) if score == min_indexes]
+
+            if beta < alpha:
+                break
+
+        if min_indexes:
+            chosen_action = actions[random.choice(min_indexes)]
+        else:
+            chosen_action = Directions.STOP
+
+        return min_score, chosen_action, alpha, beta
+
+    def maximizer(self, game_state, depth, alpha, beta, agent):
+        actions = game_state.getLegalActions(agent)
+        max_indexes = []
+        scores = []
+        max_score = -math.inf
+
+        for action in actions:
+            successor_game_state = game_state.generateSuccessor(agent, action)
+            score, temp_action, temp_alpha, temp_beta = self.minimax(successor_game_state,
+                                                                     depth,
+                                                                     alpha=alpha,
+                                                                     beta=beta,
+                                                                     agent=1,
+                                                                     maximizing=False)
+            scores.append(score)
+            max_score = max(scores)
+            alpha = max(alpha, max_score)
+            max_indexes = [i for i, score in enumerate(scores) if score == max_score]
+
+            if alpha > beta:
+                break
+
+        if max_indexes:
+            chosen_action = actions[random.choice(max_indexes)]
+        else:
+            chosen_action = Directions.STOP
+
+        return max_score, chosen_action, alpha, beta
+
+    def minimax(self, game_state, depth, alpha=-math.inf, beta=math.inf, agent=0, maximizing=True):
+        if depth == 0 or game_state.isWin() or game_state.isLose():
+            return self.evaluationFunction(game_state), Directions.STOP, alpha, beta
+
+        if maximizing:
+            return self.maximizer(game_state, depth, alpha, beta, agent)
+        else:
+            return self.minimizer(game_state, depth, alpha, beta, agent)
+
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        choosen_action = self.minimax(gameState, self.depth)[1]
+        return choosen_action
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
