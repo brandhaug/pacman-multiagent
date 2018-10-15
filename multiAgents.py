@@ -140,51 +140,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
 
     def minimizer(self, gameState, depth):
-        print('Minimizing')
+        print('============= Minimizer at depth %d =============' % depth)
 
         agents_count = gameState.getNumAgents()
-        minimum_score_sum = 0
+        min_score = math.inf
 
         for ghost_index in range(1, agents_count):
-            legalMoves = gameState.getLegalActions(ghost_index)
+            print('============= Ghost %d =============' % ghost_index)
+            legal_actions = gameState.getLegalActions(ghost_index)
 
-            minimum_score = math.inf
-
-            for move_index, action in enumerate(legalMoves):
-                print('MOVE_INDEX', move_index)
+            for action in legal_actions:
                 successor_game_state = gameState.generateSuccessor(ghost_index, action)
-
                 score = self.minimax(successor_game_state, depth - 1, True)
 
-                print('Evaluation %.2f <= minEval %.2f' % (score, minimum_score))
+                if score < min_score:
+                    print('Score %.2f <= Minimum score %.2f' % (score, min_score))
+                    min_score = score
 
-                if score <= minimum_score:
-                    minimum_score = score
-                    print('Adding evalIndex to minIndex')
-
-            minimum_score_sum += minimum_score
-
-        return minimum_score_sum
+        print('============= End Minimizer at depth %d =============' % depth)
+        return min_score
 
     def maximizer(self, gameState, depth):
-        print('Depth', depth)
-
-        print('Maximizing')
+        print('============= Maximizer at depth %d =============' % depth)
         max_score = -math.inf
+        legal_actions = gameState.getLegalActions()
 
-        legalMoves = gameState.getLegalActions()
-
-        for move_index, action in enumerate(legalMoves):
-            print('MOVE_INDEX', move_index)
+        for action in legal_actions:
+            print('Move: %s' % action)
             successor_game_state = gameState.generateSuccessor(0, action)
-
             score = self.minimax(successor_game_state, depth - 1, False)
 
-            if score >= max_score:
-                print('Evaluation %.2f >= maxEval %.2f' % (score, max_score))
+            if score > max_score:
+                print('Score %.2f >= Max Score %.2f' % (score, max_score))
                 max_score = score
 
-        print('Returning maxEval %.2f' % max_score)
+        print('Returning max_score %d' % max_score)
+        print('============= End maximizer at depth %d =============' % depth)
         return max_score
 
     def minimax(self, gameState, depth, maximizingPlayer):
@@ -222,7 +213,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         print('================ MINIMAX ================')
         legal_actions = gameState.getLegalActions()
-
         best_action = Directions.STOP
         score = -math.inf
 
