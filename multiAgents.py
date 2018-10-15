@@ -139,8 +139,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
 
-    def minimizer(self, gameState, depth):
-        print('============= Minimizer at depth %d =============' % depth)
+    def minimizer(self, gameState, current_depth):
+        print('============= Minimizer at depth %d =============' % current_depth)
 
         agents_count = gameState.getNumAgents()
         min_score = math.inf
@@ -151,36 +151,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             for action in legal_actions:
                 successor_game_state = gameState.generateSuccessor(ghost_index, action)
-                score = self.minimax(successor_game_state, depth - 1, True)
+                score = self.minimax(successor_game_state, current_depth + 1, True)
 
                 if score < min_score:
                     print('Score %.2f <= Minimum score %.2f' % (score, min_score))
                     min_score = score
 
-        print('============= End Minimizer at depth %d =============' % depth)
+        print('============= End Minimizer at depth %d =============' % current_depth)
         return min_score
 
-    def maximizer(self, gameState, depth):
-        print('============= Maximizer at depth %d =============' % depth)
+    def maximizer(self, gameState, current_depth):
+        print('============= Maximizer at depth %d =============' % current_depth)
         max_score = -math.inf
         legal_actions = gameState.getLegalActions()
 
         for action in legal_actions:
             print('Move: %s' % action)
-            successor_game_state = gameState.generateSuccessor(0, action)
-            score = self.minimax(successor_game_state, depth - 1, False)
+            successor_game_state = gameState.generateSuccessor(self.index, action)
+            score = self.minimax(successor_game_state, current_depth + 1, False)
 
             if score > max_score:
                 print('Score %.2f >= Max Score %.2f' % (score, max_score))
                 max_score = score
 
         print('Returning max_score %d' % max_score)
-        print('============= End maximizer at depth %d =============' % depth)
+        print('============= End maximizer at depth %d =============' % current_depth)
         return max_score
 
-    def minimax(self, gameState, depth, maximizingPlayer):
-        if depth == 0 or gameState.isLose() or gameState.isWin():
-            print('Depth == 0', depth == 0)
+    def minimax(self, gameState, current_depth, maximizingPlayer):
+        if current_depth == self.depth or gameState.isLose() or gameState.isWin():
+            print('Depth == 2', current_depth == 2)
             print('Is lose', gameState.isLose())
             print('Is win', gameState.isWin())
             score = gameState.getScore()
@@ -188,9 +188,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return score
 
         if maximizingPlayer:
-            return self.maximizer(gameState, depth)
+            return self.maximizer(gameState, current_depth)
         else:
-            return self.minimizer(gameState, depth)
+            return self.minimizer(gameState, current_depth)
 
     def getAction(self, gameState):
         """
@@ -210,7 +210,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-
         print('================ MINIMAX ================')
         legal_actions = gameState.getLegalActions()
         best_action = Directions.STOP
@@ -218,9 +217,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for action in legal_actions:
             print('================= START OF ACTION %s =================' % action)
-            next_state = gameState.generateSuccessor(0, action)
+            next_state = gameState.generateSuccessor(self.index, action)
             previous_score = score
-            score = self.minimax(next_state, self.depth, False)
+            score = self.minimax(next_state, 0, False)
             print('============ SCORE ============')
             print(score)
             print('============ PREVIOUS SCORE ============')
