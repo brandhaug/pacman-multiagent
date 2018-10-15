@@ -138,39 +138,52 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
     """
+
+    def minimizer(self, game_state, depth, agent):
+        actions = game_state.getLegalActions(agent)
+        min_indexes = []
+        scores = []
+        min_score = math.inf
+
+        for action in actions:
+            successor_game_state = game_state.generateSuccessor(agent, action)
+
+            if agent == game_state.getNumAgents() - 1:  # last ghost
+                scores.append(self.minimax(successor_game_state, depth - 1, 0, True)[0])
+            else:
+                scores.append(self.minimax(successor_game_state, depth, agent + 1, False)[0])
+
+            min_score = min(scores)
+            min_indexes = [i for i, score in enumerate(scores) if score == min_score]
+
+        chosen_action = actions[random.choice(min_indexes)]
+
+        return min_score, chosen_action
+
+    def maximizer(self, game_state, depth, agent):
+        actions = game_state.getLegalActions(agent)
+        max_indexes = []
+        scores = []
+        max_score = -math.inf
+
+        for action in actions:
+            successor_game_state = game_state.generateSuccessor(agent, action)
+            scores.append(self.minimax(successor_game_state, depth, 1, False)[0])
+            max_score = max(scores)
+            max_indexes = [i for i in range(len(scores)) if scores[i] == max_score]
+
+        chosen_action = actions[random.choice(max_indexes)]
+
+        return max_score, chosen_action
+
     def minimax(self, game_state, depth, agent=0, maximizing=True):
         if depth == 0 or game_state.isWin() or game_state.isLose():
             return self.evaluationFunction(game_state), Directions.STOP
 
-        actions = game_state.getLegalActions(agent)
-        best_indexes = []
-        scores = []
-
         if maximizing:
-            best_score = -math.inf
-
-            for action in actions:
-                successor_game_state = game_state.generateSuccessor(agent, action)
-                scores.append(self.minimax(successor_game_state, depth, 1, False)[0])
-                best_score = max(scores)
-                best_indexes = [i for i in range(len(scores)) if scores[i] == best_score]
+            return self.maximizer(game_state, depth, agent)
         else:
-            best_score = math.inf
-
-            for action in actions:
-                successor_game_state = game_state.generateSuccessor(agent, action)
-
-                if agent == game_state.getNumAgents() - 1:  # last ghost
-                    scores.append(self.minimax(successor_game_state, depth - 1, 0, True)[0])
-                else:
-                    scores.append(self.minimax(successor_game_state, depth, agent + 1, False)[0])
-
-                best_score = min(scores)
-                best_indexes = [i for i, score in enumerate(scores) if score == best_score]
-
-        chosen_action = actions[random.choice(best_indexes)]
-
-        return best_score, chosen_action
+            return self.minimizer(game_state, depth, agent)
 
     def getAction(self, gameState):
         """
